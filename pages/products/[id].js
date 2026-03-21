@@ -10,6 +10,9 @@ export default function ProductPage({ product, relatedProducts }) {
   const { addItem } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
+  const [activeImage, setActiveImage] = useState(0);
+
+  const images = product?.images?.length > 0 ? product.images : (product?.image ? [product.image] : []);
 
   if (router.isFallback || !product) {
     return (
@@ -55,23 +58,38 @@ export default function ProductPage({ product, relatedProducts }) {
 
           {/* Product Details */}
           <div className="grid md:grid-cols-2 gap-12">
-            {/* Image */}
-            <div className="relative">
+            {/* Image Gallery */}
+            <div className="relative flex flex-col gap-4">
               {discount > 0 && (
-                <span className="absolute top-4 left-4 bg-red-500 text-white text-sm font-bold px-3 py-1 rounded-full z-10">
+                <span className="absolute top-4 left-4 bg-red-500 text-white text-sm font-bold px-3 py-1 rounded-full z-10 shadow-sm">
                   {discount}% OFF
                 </span>
               )}
-              <div className="aspect-square bg-gradient-to-br from-emerald-50 to-amber-50 rounded-3xl flex items-center justify-center">
-                <div className="w-3/4 h-3/4 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-2xl flex items-center justify-center relative overflow-hidden">
-                  {product.image ? (
-                    // Using a standard img tag for simplicity, next/image would require domains whitelisting
-                    <img src={product.image} alt={product.name} className="object-cover w-full h-full" />
-                  ) : (
-                    <span className="text-9xl">🌿</span>
-                  )}
-                </div>
+              {/* Main Image */}
+              <div className="aspect-square bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-3xl flex items-center justify-center overflow-hidden border border-emerald-100/50 relative shadow-sm">
+                {images.length > 0 ? (
+                  <img src={images[activeImage]} alt={product.name} className="object-cover w-full h-full transition-opacity duration-300" />
+                ) : (
+                  <div className="w-3/4 h-3/4 bg-emerald-100/50 rounded-2xl flex items-center justify-center">
+                    <span className="text-9xl text-emerald-600/40">🌿</span>
+                  </div>
+                )}
               </div>
+
+              {/* Thumbnails */}
+              {images.length > 1 && (
+                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide py-1">
+                  {images.map((img, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setActiveImage(idx)}
+                      className={`relative w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all duration-200 ${activeImage === idx ? 'border-emerald-600 shadow-md transform scale-100' : 'border-transparent opacity-60 hover:opacity-100 hover:scale-95'}`}
+                    >
+                      <img src={img} alt={`${product.name} thumbnail ${idx + 1}`} className="object-cover w-full h-full" />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Info */}

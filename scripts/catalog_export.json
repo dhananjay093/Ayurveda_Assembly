@@ -1,0 +1,131 @@
+{
+  "products": [
+    {
+      "id": "1",
+      "name": "Ashwagandha Root Powder",
+      "category": "Powders",
+      "concern": [
+        "Stress & Anxiety",
+        "Energy & Stamina",
+        "Sleep"
+      ]
+    },
+    {
+      "id": "2",
+      "name": "Triphala Capsules",
+      "category": "Capsules",
+      "concern": [
+        "Digestion",
+        "Detox",
+        "Immunity"
+      ]
+    },
+    {
+      "id": "3",
+      "name": "Brahmi Memory Booster",
+      "category": "Capsules",
+      "concern": [
+        "Brain Health",
+        "Focus",
+        "Memory"
+      ]
+    },
+    {
+      "id": "4",
+      "name": "Chyawanprash - Immunity Booster",
+      "category": "Jams & Syrups",
+      "concern": [
+        "Immunity",
+        "Energy & Stamina",
+        "Respiratory"
+      ]
+    },
+    {
+      "id": "5",
+      "name": "Neem Purifying Tablets",
+      "category": "Tablets",
+      "concern": [
+        "Skin Health",
+        "Detox",
+        "Blood Purification"
+      ]
+    },
+    {
+      "id": "6",
+      "name": "Turmeric Curcumin Complex",
+      "category": "Capsules",
+      "concern": [
+        "Joint Health",
+        "Immunity",
+        "Inflammation"
+      ]
+    },
+    {
+      "id": "7",
+      "name": "Shatavari Women's Wellness",
+      "category": "Capsules",
+      "concern": [
+        "Women's Health",
+        "Hormonal Balance",
+        "Energy & Stamina"
+      ]
+    },
+    {
+      "id": "8",
+      "name": "Giloy Immunity Drops",
+      "category": "Drops & Syrups",
+      "concern": [
+        "Immunity",
+        "Fever",
+        "Detox"
+      ]
+    },
+    {
+      "id": "TVPWvRRupr8ubMDongWg",
+      "name": "test",
+      "category": "Capsules",
+      "concern": [
+        "Immunity",
+        "Skin"
+      ]
+    },
+    {
+      "id": "gim8MdsMB0efJMMCskDC",
+      "name": "Aloe Vera Gel",
+      "category": "Powders",
+      "concern": [
+        "Heart Health"
+      ]
+    },
+    {
+      "id": "zwYSlzQzHa6S9HoAKuIF",
+      "name": "Dum",
+      "category": "Capsules",
+      "concern": [
+        "skin"
+      ]
+    }
+  ],
+  "concerns": [
+    {
+      "id": "0hvkYRSaPRtP50nzlAiX",
+      "name": "Immunity"
+    },
+    {
+      "id": "FN5xZyTBkGnGDYsSv3lN",
+      "name": "Hair"
+    },
+    {
+      "id": "OdLvb0Pa1M9LlB5SLde4",
+      "name": "Digestion"
+    },
+    {
+      "id": "eeBOwEhCKF1eh4G0G1Ye",
+      "name": "Skin"
+    },
+    {
+      "id": "rPj0Bz3GpdAMaRL6vxEo",
+      "name": "Heart Health"
+    }
+  ]
+}

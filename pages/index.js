@@ -3,14 +3,9 @@ import ProductCard from '../components/ProductCard';
 import Link from 'next/link';
 import { adminDb } from '@/firebase/admin';
 
-const categories = [
-  { name: 'Powders', image: '🥣', count: 12 },
-  { name: 'Capsules', image: '💊', count: 24 },
-  { name: 'Syrups', image: '🍯', count: 8 },
-  { name: 'Oils', image: '🫒', count: 15 },
-];
 
-export default function Home({ topProducts, concerns }) {
+
+export default function Home({ topProducts, concerns, categories }) {
   const featuredProducts = topProducts.filter(p => p.featured);
 
   return (
@@ -59,33 +54,25 @@ export default function Home({ topProducts, concerns }) {
                 </div>
               </div>
             </div>
-            <div className="relative">
-              <div className="aspect-square bg-gradient-to-br from-emerald-200 to-amber-200 rounded-3xl flex items-center justify-center shadow-2xl">
-                <div className="text-center p-8">
-                  <span className="text-8xl">🌿</span>
-                  <p className="mt-4 text-emerald-800 font-medium">Premium Ayurvedic Products</p>
+            <div className="relative lg:ml-10">
+              {/* Premium image composition area */}
+              <div className="relative rounded-[2.5rem] bg-gradient-to-tr from-emerald-100/50 to-amber-50/50 p-8 shadow-[0_20px_50px_rgba(8,_112,_64,_0.07)] backdrop-blur-3xl border border-white/60">
+                {/* Decorative background elements inside the card */}
+                <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-amber-200/20 via-transparent to-transparent rounded-[2.5rem] pointer-events-none"></div>
+                <div className="absolute bottom-0 left-0 w-full h-full bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-emerald-300/20 via-transparent to-transparent rounded-[2.5rem] pointer-events-none"></div>
+
+                <div className="relative aspect-[4/5] sm:aspect-square w-full rounded-3xl overflow-hidden shadow-inner bg-white/40 border border-white/50 group">
+                  <img
+                    src="/images/hero.png"
+                    alt="Premium Ayurvedic Products"
+                    className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-in-out"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-60"></div>
                 </div>
-              </div>
-              <div className="absolute -bottom-6 -left-6 bg-white p-4 rounded-2xl shadow-xl">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
-                    <span className="text-2xl">🚚</span>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-800">Free Shipping</p>
-                    <p className="text-sm text-gray-500">On orders above ₹499</p>
-                  </div>
-                </div>
-              </div>
-              <div className="absolute -top-4 -right-4 bg-white p-4 rounded-2xl shadow-xl">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
-                    <span className="text-2xl">✓</span>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-800">100% Natural</p>
-                    <p className="text-sm text-gray-500">No side effects</p>
-                  </div>
+
+                {/* Overlaid Badge */}
+                <div className="absolute -bottom-5 left-1/2 transform -translate-x-1/2 bg-emerald-900 text-white px-6 py-3 rounded-full shadow-lg font-semibold text-sm border-4 border-white whitespace-nowrap">
+                  Trusted by 10,000+ Indians
                 </div>
               </div>
             </div>
@@ -107,8 +94,12 @@ export default function Home({ topProducts, concerns }) {
                 href={`/concern/${concern.slug}`}
                 className="group p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl hover:shadow-lg transition-all duration-300 text-center"
               >
-                <div className={`w-16 h-16 mx-auto mb-4 bg-gradient-to-br ${concern.color} rounded-2xl flex items-center justify-center text-3xl shadow-lg group-hover:scale-110 transition-transform`}>
-                  {concern.icon}
+                <div className={`w-16 h-16 mx-auto mb-4 bg-gradient-to-br ${concern.color || 'from-emerald-100 to-emerald-200'} rounded-2xl flex items-center justify-center text-3xl shadow-lg group-hover:scale-110 transition-transform overflow-hidden`}>
+                  {concern.image ? (
+                    <img src={concern.image} alt={concern.name} className="w-full h-full object-cover" />
+                  ) : (
+                    concern.icon || '🌿'
+                  )}
                 </div>
                 <h3 className="font-semibold text-gray-800 group-hover:text-emerald-600 transition-colors">
                   {concern.name}
@@ -314,13 +305,34 @@ export async function getServerSideProps() {
       ];
     }
 
+    // Fetch all products to calculate category counts dynamically
+    const allProductsSnapshot = await adminDb.collection('products').get();
+
+    // Default categories structure
+    const categoriesMap = {
+      'powders': { name: 'Powders', image: '🥣', count: 0 },
+      'capsules': { name: 'Capsules', image: '💊', count: 0 },
+      'syrups': { name: 'Syrups', image: '🍯', count: 0 },
+      'oils': { name: 'Oils', image: '🫒', count: 0 }
+    };
+
+    allProductsSnapshot.forEach(doc => {
+      const data = doc.data();
+      const cat = data.category?.toLowerCase();
+      if (cat && categoriesMap[cat]) {
+        categoriesMap[cat].count += 1;
+      }
+    });
+
+    const categories = Object.values(categoriesMap);
+
     return {
-      props: { topProducts, concerns },
+      props: { topProducts, concerns, categories },
     };
   } catch (error) {
     console.error("Error fetching Homepage Data:", error);
     return {
-      props: { topProducts: [], concerns: [] },
+      props: { topProducts: [], concerns: [], categories: [] },
     };
   }
 }

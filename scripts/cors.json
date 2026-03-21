@@ -1,0 +1,24 @@
+[
+    {
+        "origin": [
+            "http://localhost:3000",
+            "https://ayurveda-assembly.web.app",
+            "https://ayurveda-assembly.firebaseapp.com"
+        ],
+        "method": [
+            "GET",
+            "POST",
+            "PUT",
+            "DELETE",
+            "OPTIONS",
+            "HEAD"
+        ],
+        "responseHeader": [
+            "Content-Type",
+            "Authorization",
+            "Content-Length",
+            "X-Requested-With"
+        ],
+        "maxAgeSeconds": 3600
+    }
+]

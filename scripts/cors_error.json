@@ -1,0 +1,13 @@
+{
+  "name": "Error",
+  "message": "The specified bucket does not exist.",
+  "stack": "Error: The specified bucket does not exist.\n    at new ApiError (D:\\code\\Ayurved_web\\ayurveda_assembly\\node_modules\\@google-cloud\\storage\\build\\cjs\\src\\nodejs-common\\util.js:124:15)\n    at Util.parseHttpRespBody (D:\\code\\Ayurved_web\\ayurveda_assembly\\node_modules\\@google-cloud\\storage\\build\\cjs\\src\\nodejs-common\\util.js:263:38)\n    at Util.handleResp (D:\\code\\Ayurved_web\\ayurveda_assembly\\node_modules\\@google-cloud\\storage\\build\\cjs\\src\\nodejs-common\\util.js:203:30)\n    at D:\\code\\Ayurved_web\\ayurveda_assembly\\node_modules\\@google-cloud\\storage\\build\\cjs\\src\\nodejs-common\\util.js:593:22\n    at onResponse (D:\\code\\Ayurved_web\\ayurveda_assembly\\node_modules\\retry-request\\index.js:259:7)\n    at D:\\code\\Ayurved_web\\ayurveda_assembly\\node_modules\\teeny-request\\build\\src\\index.js:226:13\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)",
+  "code": 404,
+  "errors": [
+    {
+      "message": "The specified bucket does not exist.",
+      "domain": "global",
+      "reason": "notFound"
+    }
+  ]
+}

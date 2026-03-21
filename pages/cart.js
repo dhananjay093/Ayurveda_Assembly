@@ -69,8 +69,12 @@ export default function CartPage() {
               {items.map(item => (
                 <div key={item.id} className="bg-white rounded-xl p-6 shadow-sm flex gap-6">
                   {/* Image */}
-                  <div className="w-24 h-24 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-lg flex-shrink-0 flex items-center justify-center">
-                    <span className="text-4xl">🌿</span>
+                  <div className="w-24 h-24 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden">
+                    {item.images?.[0] || item.image ? (
+                      <img src={item.images?.[0] || item.image} alt={item.name} className="object-cover w-full h-full" />
+                    ) : (
+                      <span className="text-4xl text-emerald-600">🌿</span>
+                    )}
                   </div>
 
                   {/* Details */}
@@ -79,7 +83,7 @@ export default function CartPage() {
                       {item.name}
                     </Link>
                     <p className="text-sm text-gray-500 mt-1">{item.category}</p>
-                    
+
                     <div className="flex items-center justify-between mt-4">
                       {/* Quantity */}
                       <div className="flex items-center border border-gray-200 rounded-lg">

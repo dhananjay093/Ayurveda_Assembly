@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import ConcernIcon from '../../components/ConcernIcon';
+import { storage } from '@/firebase/config';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -7,12 +10,13 @@ export default function AdminDashboard() {
   const [password, setPassword] = useState('');
   const [activeTab, setActiveTab] = useState('orders'); // Default to orders
   const [loading, setLoading] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   // Products State
   const [products, setProducts] = useState([]);
   const [editingProduct, setEditingProduct] = useState(null);
   const [newProduct, setNewProduct] = useState({
-    name: '', description: '', price: '', originalPrice: '', category: 'Capsules', concern: '', weight: '', image: '', inStock: true, featured: false
+    name: '', description: '', price: '', originalPrice: '', category: 'Capsules', concern: '', weight: '', images: [], inStock: true, featured: false
   });
 
   // Orders State
@@ -151,7 +155,7 @@ export default function AdminDashboard() {
       if (response.ok) {
         alert(isEditing ? 'Product updated!' : 'Product added!');
         fetchProducts();
-        if (!isEditing) setNewProduct({ name: '', description: '', price: '', originalPrice: '', category: 'Capsules', concern: '', weight: '', image: '', inStock: true, featured: false });
+        if (!isEditing) setNewProduct({ name: '', description: '', price: '', originalPrice: '', category: 'Capsules', concern: '', weight: '', images: [], inStock: true, featured: false });
         else setEditingProduct(null);
       } else {
         const data = await response.json();
@@ -318,6 +322,58 @@ export default function AdminDashboard() {
   // Helper to get concern array from formData
   const getConcernArray = (formData) => {
     return Array.isArray(formData.concern) ? formData.concern : (typeof formData.concern === 'string' && formData.concern ? formData.concern.split(',').map(s => s.trim()).filter(Boolean) : []);
+  };
+
+  const handleImageUpload = async (e, formData, setFormData) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+
+    setUploadingImage(true);
+    let newUrls = [];
+
+    try {
+      const uploadPromises = files.map(file => {
+        return new Promise((resolve, reject) => {
+          const storageRef = ref(storage, `products/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`);
+          const uploadTask = uploadBytesResumable(storageRef, file);
+
+          uploadTask.on('state_changed',
+            null,
+            (error) => reject(error),
+            async () => {
+              try {
+                const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                resolve(downloadURL);
+              } catch (urlError) {
+                reject(urlError);
+              }
+            }
+          );
+        });
+      });
+
+      newUrls = await Promise.all(uploadPromises);
+
+      setFormData(prev => {
+        const currentImages = Array.isArray(prev.images) ? prev.images : (prev.image ? [prev.image] : []);
+        return { ...prev, images: [...currentImages, ...newUrls] };
+      });
+      console.log('Successfully uploaded:', newUrls.length, 'images');
+
+    } catch (err) {
+      console.error('Upload Error:', err);
+      alert('Failed to upload one or more images.');
+    } finally {
+      setUploadingImage(false);
+      // Reset the file input so the same files can be selected again if needed
+      e.target.value = null;
+    }
+  };
+
+  const removeImage = (indexToRemove, formData, setFormData) => {
+    const currentImages = Array.isArray(formData.images) ? formData.images : (formData.image ? [formData.image] : []);
+    const newImages = currentImages.filter((_, idx) => idx !== indexToRemove);
+    setFormData(prev => ({ ...prev, images: newImages }));
   };
 
 
@@ -510,7 +566,9 @@ export default function AdminDashboard() {
                               className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${selectedConcerns.includes(c.name)
                                 ? 'bg-emerald-100 text-emerald-700 border-emerald-300 shadow-sm' : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'}`}
                             >
-                              {c.icon} {c.name} {selectedConcerns.includes(c.name) && '✓'}
+                              {selectedConcerns.includes(c.name) ? '✓ ' : ''}
+                              <ConcernIcon slug={c.slug || c.name} className="w-4 h-4 inline-block mr-1" />
+                              {c.name}
                             </button>
                           ))}
                         </div>
@@ -519,11 +577,46 @@ export default function AdminDashboard() {
                       )}
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
-                      <input type="url" value={formData.image} onChange={(e) => setFormData({ ...formData, image: e.target.value })} className="w-full px-4 py-2 border rounded-lg focus:ring-emerald-500 focus:outline-none" placeholder="https://..." />
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Product Images *</label>
+                      <p className="text-xs text-gray-500 mb-2">Upload multiple high-quality product images (JPEG, PNG, WebP). Square format recommended.</p>
+
+                      <div className="flex flex-wrap gap-3 mb-3">
+                        {(() => {
+                          const currentImages = Array.isArray(formData.images) ? formData.images : (formData.image ? [formData.image] : []);
+                          return currentImages.map((imgUrl, idx) => (
+                            <div key={idx} className="relative w-24 h-24 border rounded-lg overflow-hidden flex items-center justify-center bg-gray-50 shadow-sm group">
+                              <img src={imgUrl} alt={`Preview ${idx}`} className="object-contain w-full h-full" />
+                              <button
+                                type="button"
+                                onClick={() => removeImage(idx, formData, setFormData)}
+                                className="absolute top-1 right-1 bg-white/90 rounded-full p-1 shadow hover:bg-red-50 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                              >
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                              </button>
+                            </div>
+                          ));
+                        })()}
+                      </div>
+
+                      <div className="relative">
+                        <input
+                          type="file"
+                          multiple
+                          accept="image/jpeg, image/png, image/webp"
+                          onChange={(e) => handleImageUpload(e, formData, setFormData)}
+                          disabled={uploadingImage}
+                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 transition-all border border-gray-300 rounded-lg cursor-pointer focus:outline-none"
+                        />
+                        {uploadingImage && (
+                          <div className="absolute inset-y-0 right-3 flex items-center">
+                            <span className="text-xs text-emerald-600 font-medium mr-2">Uploading...</span>
+                            <svg className="animate-spin h-4 w-4 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  <button type="submit" disabled={loading} className="w-full md:w-auto px-8 py-3 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 disabled:opacity-50 transition-colors">
+                  <button type="submit" disabled={loading || uploadingImage} className="w-full md:w-auto px-8 py-3 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 disabled:opacity-50 transition-colors shadow-sm">
                     {loading ? 'Saving...' : (isEditing ? 'Update Product' : 'Add Product')}
                   </button>
                 </form>
@@ -909,16 +1002,8 @@ export default function AdminDashboard() {
                       required
                     />
                   </div>
-                  <div className="w-24">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Emoji Icon</label>
-                    <input
-                      type="text"
-                      value={newConcernIcon}
-                      onChange={e => setNewConcernIcon(e.target.value)}
-                      placeholder="🛡️"
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-center"
-                    />
-                  </div>
+                  {/* Icon input hidden, we use SVG professional icons automatically mapping to name */}
+
                   <button type="submit" disabled={loading} className="px-8 py-3 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-700 disabled:opacity-50 transition-colors shadow-sm">
                     {loading ? 'Adding...' : 'Add Concern'}
                   </button>
@@ -932,7 +1017,7 @@ export default function AdminDashboard() {
                   {concerns.map(c => (
                     <div key={c.id} className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
                       <div className="flex items-center space-x-3">
-                        <span className="text-2xl">{c.icon}</span>
+                        <ConcernIcon slug={c.slug || c.name} className="w-8 h-8 text-emerald-600" />
                         <div>
                           <div className="font-bold text-gray-900">{c.name}</div>
                           <div className="text-[10px] text-gray-400 font-mono uppercase tracking-wider">{c.slug}</div>

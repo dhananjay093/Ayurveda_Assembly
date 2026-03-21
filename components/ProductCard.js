@@ -15,10 +15,13 @@ export default function ProductCard({ product }) {
             </span>
           )}
           <div className="w-full h-full flex items-center justify-center p-6 group-hover:scale-105 transition-transform duration-300">
-            {/* Placeholder for product image */}
-            <div className="w-full h-full bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-xl flex items-center justify-center">
-              <span className="text-emerald-600 text-4xl">🌿</span>
-            </div>
+            {product.images?.[0] || product.image ? (
+              <img src={product.images?.[0] || product.image} alt={product.name} className="object-cover w-full h-full rounded-xl" />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-xl flex items-center justify-center">
+                <span className="text-emerald-600 text-4xl">🌿</span>
+              </div>
+            )}
           </div>
           {/* Quick Add Button */}
           <button className="absolute bottom-3 left-1/2 transform -translate-x-1/2 translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 bg-emerald-600 text-white px-6 py-2 rounded-full font-medium hover:bg-emerald-700">
@@ -32,12 +35,12 @@ export default function ProductCard({ product }) {
           <span className="text-xs text-emerald-600 font-medium uppercase tracking-wide">
             {product.category}
           </span>
-          
+
           {/* Product Name */}
           <h3 className="mt-1 font-semibold text-gray-800 group-hover:text-emerald-600 transition-colors line-clamp-2">
             {product.name}
           </h3>
-          
+
           {/* Rating */}
           <div className="flex items-center mt-2 space-x-1">
             <div className="flex items-center">
@@ -54,7 +57,7 @@ export default function ProductCard({ product }) {
             </div>
             <span className="text-sm text-gray-500">({product.reviews})</span>
           </div>
-          
+
           {/* Price */}
           <div className="mt-3 flex items-center space-x-2">
             <span className="text-xl font-bold text-gray-900">₹{product.price}</span>
